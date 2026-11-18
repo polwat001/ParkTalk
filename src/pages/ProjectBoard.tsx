@@ -14,11 +14,13 @@ import {
   MoreHorizontal,
   Plus,
   Star,
+  Table2,
   Users,
   X,
   Zap,
 } from "lucide-react";
 import AppLayout from "@/components/parktalk/AppLayout";
+import { BoardTable } from "@/components/parktalk/BoardTable";
 import { BoardTimeline } from "@/components/parktalk/BoardTimeline";
 import { EmptyState } from "@/components/parktalk/EmptyState";
 import { ReasonDialog } from "@/components/parktalk/ReasonDialog";
@@ -58,6 +60,7 @@ import { claimTask, createBoard, createTask, moveTask, reorderList, useCurrentUs
 import { fmtDateTime, timeStatus } from "@/lib/parktalk/time";
 import type { Priority, Task, TaskStatus, TimeStatus } from "@/lib/parktalk/types";
 import { useCardDrag, type DropTarget } from "@/lib/parktalk/useCardDrag";
+import { useDragPan } from "@/lib/parktalk/useDragPan";
 import { cn } from "@/lib/utils";
 
 const ALL = "all";
@@ -105,7 +108,8 @@ export default function ProjectBoard() {
 
   const project = db.projects.find((p) => p.id === id);
   const boardId = params.get("board") ?? ALL;
-  const view = params.get("view") === "timeline" ? "timeline" : "board";
+  const viewParam = params.get("view");
+  const view: "board" | "table" | "timeline" = viewParam === "timeline" || viewParam === "table" ? viewParam : "board";
   const setParam = (key: string, value: string | null) => {
     const next = new URLSearchParams(params);
     if (value === null) next.delete(key);
@@ -134,7 +138,12 @@ export default function ProjectBoard() {
       .sort((a, b) => a.order - b.order);
   }, [db, project, me, boardId, filters]);
 
-  const { drag, startDrag, guardClick } = useCardDrag(scrollerRef, (taskId, target) => {
+  useDragPan(scrollerRef, view === "board");
+
+  const { drag, startDrag, guardClick } = useCardDrag(scrollerRef, (taskId, target) => requestMove(taskId, target));
+
+  /** Shared by drag-and-drop and the table's list column. */
+  function requestMove(taskId: string, target: DropTarget) {
     const task = db.tasks.find((t) => t.id === taskId);
     if (!task || !me) return;
     const denied = moveDeniedReason(db, me, task, target.status);
@@ -146,7 +155,7 @@ export default function ProjectBoard() {
       () => moveTask(taskId, target.status, "", target.beforeId),
       task.status === target.status ? undefined : `${taskId} → ${STATUS_LABEL[target.status]}`,
     );
-  });
+  }
 
   // card currently right after `taskId` in its list (to skip no-op drops)
   const nextIdAfter = (taskId: string, status: TaskStatus) => {
@@ -296,8 +305,26 @@ export default function ProjectBoard() {
           </div>
         </div>
 
-        {canCreate && view === "board" && (
-          <div className="shrink-0 px-4 pt-3 flex justify-end">
+        {view !== "timeline" && (
+          <div className="shrink-0 px-4 pt-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="inline-flex items-center gap-1 rounded-lg border border-white/15 bg-black/20 p-1" role="tablist" aria-label="รูปแบบการแสดงผล">
+              {([
+                { key: "board", label: "บอร์ด", icon: KanbanSquare },
+                { key: "table", label: "ตาราง", icon: Table2 },
+              ] as const).map((v) => (
+                <button
+                  key={v.key}
+                  role="tab"
+                  aria-selected={view === v.key}
+                  onClick={() => setParam("view", v.key === "board" ? null : v.key)}
+                  className={cn("inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium", view === v.key ? "bg-primary text-white" : "text-white/70 hover:text-white hover:bg-white/10")}
+                >
+                  <v.icon className="h-4 w-4" /> {v.label}
+                </button>
+              ))}
+            </div>
+            {view === "board" && <span className="hidden md:inline text-xs text-white/55 mr-auto">ลากการ์ดเพื่อย้ายลิสต์ · คลิกค้างที่พื้นที่ว่างแล้วลากเพื่อเลื่อนบอร์ด</span>}
+            {canCreate && (
             <Button
               className="bg-gradient-primary hover:opacity-95 shadow-glow"
               onClick={() => {
@@ -307,6 +334,7 @@ export default function ProjectBoard() {
             >
               <Plus className="h-4 w-4" /> สร้างการ์ด
             </Button>
+            )}
           </div>
         )}
 
@@ -314,8 +342,18 @@ export default function ProjectBoard() {
           <div className="flex-1 min-h-0 overflow-auto scroll-thin px-4 pt-3 pb-24">
             <BoardTimeline tasks={tasks} db={db} onOpen={(tid) => navigate(`/tasks/${tid}`)} />
           </div>
+        ) : view === "table" ? (
+          <div className="flex-1 min-h-0 overflow-auto scroll-thin px-4 pt-3 pb-24">
+            <BoardTable
+              tasks={tasks}
+              db={db}
+              me={me}
+              onOpen={(tid) => navigate(`/tasks/${tid}`)}
+              onMove={(tid, status) => requestMove(tid, { status, beforeId: null })}
+            />
+          </div>
         ) : (
-          <div ref={scrollerRef} className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden scroll-thin">
+          <div ref={scrollerRef} className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden scroll-thin cursor-grab">
             <div className="h-full flex items-start gap-3 px-4 pt-3 pb-24 w-max">
               {STATUS_ORDER.map((status) => {
                 const items = tasks.filter((t) => t.status === status);
@@ -435,6 +473,7 @@ export default function ProjectBoard() {
           <DockButton icon={History} label="กิจกรรมล่าสุด" onClick={() => setActivityOpen(true)} />
           <DockButton icon={GanttChart} label="ไทม์ไลน์" active={view === "timeline"} onClick={() => setParam("view", "timeline")} />
           <DockButton icon={KanbanSquare} label="บอร์ด" active={view === "board"} onClick={() => setParam("view", null)} />
+          <DockButton icon={Table2} label="ตาราง" active={view === "table"} onClick={() => setParam("view", "table")} />
           <DockButton icon={CalendarDays} label="ปฏิทิน" onClick={() => navigate(`/calendar?project=${project.id}`)} />
           <DockButton icon={BarChart3} label="สรุปรายงาน" onClick={() => navigate(`/dashboard?project=${project.id}`)} />
         </nav>
