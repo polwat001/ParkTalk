@@ -22,8 +22,8 @@ export function BoardTimeline({ tasks, db, onOpen }: { tasks: Task[]; db: Databa
   if (rows.length === 0) return <EmptyState className="bg-black/20 border-white/15 text-white/70">ไม่มีการ์ดที่ตรงกับฟิลเตอร์</EmptyState>;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-[hsl(256_26%_10%/0.92)] overflow-hidden w-max min-w-full">
-      <div className="flex border-b border-white/10 sticky top-0 bg-[hsl(256_26%_10%)] z-10">
+    <div className="rounded-xl border border-white/10 bg-[hsl(222_56%_9%/0.92)] overflow-hidden w-max min-w-full">
+      <div className="flex border-b border-white/10 sticky top-0 bg-[hsl(222_56%_9%)] z-10">
         <div className="w-72 shrink-0 px-3 py-2 text-xs font-semibold text-white/60">การ์ด</div>
         {days.map((d) => (
           <div

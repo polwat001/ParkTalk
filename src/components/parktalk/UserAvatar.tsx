@@ -1,5 +1,6 @@
 import type { User } from "@/lib/parktalk/types";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const COLORS = [
   "bg-sky-500/20 text-sky-300",
@@ -25,8 +26,9 @@ export function UserAvatar({ user, size = "sm", className }: { user?: User | nul
   }
   const color = COLORS[user.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length];
   return (
-    <span className={cn("inline-grid place-items-center rounded-full font-semibold shrink-0", dims, color, className)} title={user.name}>
-      {initials(user.name)}
-    </span>
+    <Avatar className={cn("inline-flex font-semibold", dims, className)} title={user.name}>
+      {user.avatarUrl && <AvatarImage src={user.avatarUrl} alt="" className="object-cover" />}
+      <AvatarFallback className={color}>{initials(user.name)}</AvatarFallback>
+    </Avatar>
   );
 }

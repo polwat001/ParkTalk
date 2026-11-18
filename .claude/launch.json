@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "parktalk",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "--mode", "preview-http", "--port", "5173", "--strictPort"],
+      "port": 5173
+    }
+  ]
+}

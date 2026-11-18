@@ -82,7 +82,11 @@ export function createSeed(now = Date.now()): Database {
     base({ id: "PT-17", title: "พัฒนา API เชื่อมระบบบัญชีการเงิน", description: "รอการยืนยัน spec จากทีมบัญชี", labels: ["frontend"], status: "standby", openForClaim: true, boardId: "B2", dueDate: iso(now + 21 * D), checklist: checks(4, 0) }),
     // Documents
     base({ id: "PT-18", title: "คู่มือการพัฒนาระบบ (ParkTalk Dev Guide)", description: "มาตรฐานการพัฒนา, Coding Guideline และการ Deploy", labels: ["docs"], status: "documents", reviewerId: null, dueDate: iso(now + 60 * D), attachments: [{ id: "F1", name: "ParkTalk Dev Guide v1.3", url: "https://example.com/parktalk-dev-guide", addedBy: "U3", addedAt: iso(now - 9 * D) }] }),
-    base({ id: "PT-19", title: "สไลด์สรุปสถาปัตยกรรมระบบ", description: "สไลด์สำหรับ onboarding ทีมใหม่", labels: ["docs"], status: "documents", reviewerId: null, dueDate: iso(now + 60 * D) }),
+    base({ id: "PT-19", title: "สไลด์สรุปสถาปัตยกรรมระบบ", description: "สไลด์สำหรับ onboarding ทีมใหม่", labels: ["docs"], status: "documents", reviewerId: null, dueDate: iso(now + 60 * D), attachments: [{ id: "F2", name: "ParkTalk Architecture.png", url: "/samples/parktalk-architecture.svg", addedBy: "U3", addedAt: iso(now - 6 * D) }] }),
+    base({ id: "PT-21", title: "Mockup หน้าจอเวอร์ชันใหม่", description: "ต้นแบบ UI สำหรับเวอร์ชัน 2.5", labels: ["uiux"], status: "documents", reviewerId: null, dueDate: iso(now + 60 * D), attachments: [
+      { id: "F3", name: "Dashboard mockup.png", url: "/samples/dashboard-mockup.svg", addedBy: "U4", addedAt: iso(now - 3 * D) },
+      { id: "F4", name: "Board mockup.fig", url: "https://example.com/board-mockup", addedBy: "U4", addedAt: iso(now - 3 * D) },
+    ] }),
     base({ id: "PT-20", title: "Daily build & smoke test", description: "รันชุดทดสอบหลักทุกวัน", labels: ["qa"], priority: "low", status: "todo", assigneeId: "U6", boardId: "B3", recurrence: "daily", dueDate: iso(now + 8 * D) }),
     // Mobile project
     base({ id: "MB-1", projectId: "P2", boardId: "B4", title: "ปรับ UI หน้าแรกแอปมือถือ", labels: ["frontend"], status: "in_progress", assigneeId: "U4", reviewerId: "U2", createdBy: "U2", dueDate: iso(now + 2 * D) }),
@@ -90,7 +94,7 @@ export function createSeed(now = Date.now()): Database {
   ];
 
   return {
-    version: 2,
+    version: 3,
     users,
     projects: [
       {
@@ -151,6 +155,6 @@ export function createSeed(now = Date.now()): Database {
       permissions: JSON.parse(JSON.stringify(DEFAULT_PERMISSIONS)),
     },
     sentKeys: [],
-    counters: { P1: 20, P2: 2 },
+    counters: { P1: 21, P2: 2 },
   };
 }

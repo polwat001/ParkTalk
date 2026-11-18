@@ -1,11 +1,11 @@
-import { AlertTriangle, CheckCircle2, CheckSquare, Clock, Flame, Hand, MessageSquare, Paperclip, RotateCcw } from "lucide-react";
+import { AlertTriangle, CheckCircle2, CheckSquare, Clock, Flame, GripVertical, Hand, MessageSquare, Paperclip, RotateCcw } from "lucide-react";
 import { UserAvatar } from "./UserAvatar";
 import { labelOf } from "@/lib/parktalk/constants";
 import { fmtShort, relativeDue, timeStatus } from "@/lib/parktalk/time";
 import type { Database, Task, User } from "@/lib/parktalk/types";
 import { cn } from "@/lib/utils";
 
-const IMAGE_RE = /\.(png|jpe?g|gif|webp|avif)(\?.*)?$/i;
+const IMAGE_RE = /\.(png|jpe?g|gif|webp|avif|svg)(\?.*)?$/i;
 
 interface Props {
   task: Task;
@@ -13,6 +13,7 @@ interface Props {
   me: User;
   canClaim?: boolean;
   showProject?: boolean;
+  spacious?: boolean;
   /** rendered as the floating copy under the pointer */
   ghost?: boolean;
   onOpen?: (id: string) => void;
@@ -20,7 +21,7 @@ interface Props {
   onPointerDown?: (e: React.PointerEvent<HTMLElement>, task: Task) => void;
 }
 
-export function TaskCard({ task, db, me, canClaim, showProject, ghost, onOpen, onClaim, onPointerDown }: Props) {
+export function TaskCard({ task, db, me, canClaim, showProject, spacious, ghost, onOpen, onClaim, onPointerDown }: Props) {
   const assignee = db.users.find((u) => u.id === task.assigneeId) ?? null;
   const ts = timeStatus(task, db.settings);
   const done = task.status === "done";
@@ -58,11 +59,12 @@ export function TaskCard({ task, db, me, canClaim, showProject, ghost, onOpen, o
       )}
     >
       {cover && (
-        <div className="bg-white/5 p-2 pb-0">
-          <img src={cover.url} alt="" className="w-full h-24 object-cover rounded-md" loading="lazy" draggable={false} />
+        <div className="p-2 pb-0">
+          <img src={cover.url} alt="" className="w-full h-20 object-cover rounded-md bg-white" loading="lazy" draggable={false} />
         </div>
       )}
-      <div className="p-3 space-y-2">
+      <div className={cn("relative px-2 py-2.5 space-y-1.5", spacious && "px-4 py-4 space-y-2")}>
+        {ghost && <GripVertical className="absolute -left-0.5 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50" aria-hidden />}
         {(task.labels.length > 0 || task.inRevision) && (
           <div className="flex flex-wrap items-center gap-1">
             {task.labels.map((k) => {
@@ -76,42 +78,44 @@ export function TaskCard({ task, db, me, canClaim, showProject, ghost, onOpen, o
             )}
           </div>
         )}
-        {project && <div className="text-[11px] text-muted-foreground truncate">{project.name}</div>}
-        <h3 className="text-sm font-semibold leading-snug flex gap-1.5">
+        {project && <div className={cn("text-[11px] text-muted-foreground truncate", spacious && "text-sm")}>{project.name}</div>}
+        <h3 className={cn("text-[13px] font-semibold leading-snug flex gap-1.5", spacious && "text-base leading-snug", ghost && "pl-3")}>
           {done && <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />}
           {(task.priority === "critical" || task.priority === "high") && !done && (
             <Flame className={cn("h-4 w-4 shrink-0 mt-0.5", task.priority === "critical" ? "text-red-400" : "text-orange-400")} aria-label={`Priority ${task.priority}`} />
           )}
-          <span className="min-w-0">{task.title}</span>
+          <span className={cn("min-w-0", spacious && "break-words")}>{task.title}</span>
         </h3>
-        {task.description && <p className="text-xs text-muted-foreground line-clamp-2">{task.description}</p>}
+        {task.description && <p className={cn("text-[11px] leading-snug text-muted-foreground line-clamp-2", spacious && "text-sm", ghost && "pl-3")}>{task.description}</p>}
 
-        <div className="flex items-center gap-2 pt-0.5 text-xs text-muted-foreground">
+        <div className={cn("flex items-end gap-1.5 pt-1 text-[10.5px] text-muted-foreground whitespace-nowrap", spacious && "text-xs", ghost && "pl-3")}>
+          <span className="flex flex-wrap items-center gap-x-1.5 gap-y-1 min-w-0">
           {task.status !== "documents" && (
-            <span className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 font-medium", dueTone)} title={done ? "ปิดงานแล้ว" : relativeDue(task.dueDate)}>
+            <span className={cn("inline-flex items-center gap-0.5 rounded-md border px-1 py-px font-medium", dueTone)} title={done ? "ปิดงานแล้ว" : relativeDue(task.dueDate)}>
               {ts === "overdue" ? <AlertTriangle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
               {fmtShort(task.dueDate)}
             </span>
           )}
           {task.checklist.length > 0 && (
             <span className={cn("inline-flex items-center gap-1", checked === task.checklist.length && "text-emerald-400")} title="Checklist">
-              <CheckSquare className="h-3.5 w-3.5" />
+              <CheckSquare className="h-3 w-3" />
               {checked}/{task.checklist.length}
             </span>
           )}
           {task.comments.length > 0 && (
             <span className="inline-flex items-center gap-1" title="ความคิดเห็น">
-              <MessageSquare className="h-3.5 w-3.5" />
+              <MessageSquare className="h-3 w-3" />
               {task.comments.length}
             </span>
           )}
           {task.attachments.length > 0 && (
             <span className="inline-flex items-center gap-1" title="ไฟล์แนบ">
-              <Paperclip className="h-3.5 w-3.5" />
+              <Paperclip className="h-3 w-3" />
               {task.attachments.length}
             </span>
           )}
-          <span className="ml-auto flex items-center gap-1.5">
+          </span>
+          <span className="ml-auto shrink-0 flex items-center gap-1.5">
             {canClaim && onClaim && !assignee ? (
               <button
                 onPointerDown={(e) => e.stopPropagation()}
@@ -119,12 +123,13 @@ export function TaskCard({ task, db, me, canClaim, showProject, ghost, onOpen, o
                   e.stopPropagation();
                   onClaim(task.id);
                 }}
-                className="inline-flex items-center gap-1 rounded-md bg-emerald-500/20 px-1.5 py-0.5 text-emerald-300 font-semibold hover:bg-emerald-500/30"
+                className="inline-flex items-center gap-0.5 rounded-md bg-emerald-500/20 px-1.5 py-0.5 text-emerald-300 font-semibold hover:bg-emerald-500/30"
+                title="รับงานนี้"
               >
-                <Hand className="h-3 w-3" /> รับงาน
+                <Hand className="h-3 w-3" /> รับ
               </button>
             ) : (
-              <UserAvatar user={assignee} size="xs" />
+              (assignee || task.status !== "documents") && <UserAvatar user={assignee} size="xs" className="h-5 w-5 text-[9px]" />
             )}
           </span>
         </div>

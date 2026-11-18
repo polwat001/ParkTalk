@@ -251,7 +251,7 @@ export default function ProjectBoard() {
                   <DropdownMenuItem onSelect={() => navigate("/projects")}>ดูบอร์ดทั้งหมด</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <p className="text-sm text-white/70 truncate max-w-[32rem]">{project.description || "—"}</p>
+              <p className="hidden sm:block text-sm text-white/70 truncate max-w-[32rem]">{project.description || "—"}</p>
             </div>
 
             {/* sub-boards (Frontend / Backend / …) */}
@@ -269,15 +269,15 @@ export default function ProjectBoard() {
               ))}
             </div>
 
-            <div className="ml-auto flex flex-wrap items-center gap-2">
+            <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
               <button className="hidden md:flex -space-x-2 mr-1" onClick={() => navigate(`/projects?manage=${project.id}`)} aria-label="ดูสมาชิก">
-                {members.slice(0, 4).map((u) => <UserAvatar key={u!.id} user={u} className="ring-2 ring-[hsl(258_40%_20%)]" />)}
+                {members.slice(0, 4).map((u) => <UserAvatar key={u!.id} user={u} className="ring-2 ring-[hsl(218_70%_18%)]" />)}
                 {members.length > 4 && (
-                  <span className="h-8 w-8 rounded-full bg-white/15 ring-2 ring-[hsl(258_40%_20%)] grid place-items-center text-xs font-semibold">+{members.length - 4}</span>
+                  <span className="h-8 w-8 rounded-full bg-white/15 ring-2 ring-[hsl(218_70%_18%)] grid place-items-center text-xs font-semibold">+{members.length - 4}</span>
                 )}
               </button>
               <HeaderButton onClick={() => navigate(`/projects?manage=${project.id}`)}>
-                <Users className="h-4 w-4" /> สมาชิก
+                <Users className="h-4 w-4" /> <span className="hidden sm:inline">สมาชิก</span>
               </HeaderButton>
               <FilterPopover filters={filters} setFilters={setFilters} members={members.map((u) => ({ id: u!.id, name: u!.name }))} active={activeFilters} />
               <AutomationPopover isAdmin={can(db, me, "manageUsers")} />
@@ -305,26 +305,8 @@ export default function ProjectBoard() {
           </div>
         </div>
 
-        {view !== "timeline" && (
-          <div className="shrink-0 px-4 pt-3 flex flex-wrap items-center justify-between gap-2">
-            <div className="inline-flex items-center gap-1 rounded-lg border border-white/15 bg-black/20 p-1" role="tablist" aria-label="รูปแบบการแสดงผล">
-              {([
-                { key: "board", label: "บอร์ด", icon: KanbanSquare },
-                { key: "table", label: "ตาราง", icon: Table2 },
-              ] as const).map((v) => (
-                <button
-                  key={v.key}
-                  role="tab"
-                  aria-selected={view === v.key}
-                  onClick={() => setParam("view", v.key === "board" ? null : v.key)}
-                  className={cn("inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium", view === v.key ? "bg-primary text-white" : "text-white/70 hover:text-white hover:bg-white/10")}
-                >
-                  <v.icon className="h-4 w-4" /> {v.label}
-                </button>
-              ))}
-            </div>
-            {view === "board" && <span className="hidden md:inline text-xs text-white/55 mr-auto">ลากการ์ดเพื่อย้ายลิสต์ · คลิกค้างที่พื้นที่ว่างแล้วลากเพื่อเลื่อนบอร์ด</span>}
-            {canCreate && (
+        {view !== "timeline" && canCreate && (
+          <div className="shrink-0 px-4 pt-3 flex justify-end">
             <Button
               className="bg-gradient-primary hover:opacity-95 shadow-glow"
               onClick={() => {
@@ -334,7 +316,6 @@ export default function ProjectBoard() {
             >
               <Plus className="h-4 w-4" /> สร้างการ์ด
             </Button>
-            )}
           </div>
         )}
 
@@ -354,7 +335,7 @@ export default function ProjectBoard() {
           </div>
         ) : (
           <div ref={scrollerRef} className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden scroll-thin cursor-grab">
-            <div className="h-full flex items-start gap-3 px-4 pt-3 pb-24 w-max">
+            <div className="h-full w-full min-w-[calc(9*9.75rem+8*0.625rem+2rem)] flex items-stretch gap-2.5 px-4 pt-3 pb-24">
               {STATUS_ORDER.map((status) => {
                 const items = tasks.filter((t) => t.status === status);
                 const over = drag?.over?.status === status;
@@ -384,11 +365,11 @@ export default function ProjectBoard() {
                     data-list={status}
                     aria-label={`${STATUS_LABEL[status]} ${items.length} การ์ด`}
                     className={cn(
-                      "w-[17.5rem] flex-none max-h-full flex flex-col rounded-xl bg-[hsl(256_26%_10%/0.92)] border border-white/5 shadow-card",
+                      "flex-1 basis-0 min-w-[9.75rem] max-w-[22rem] h-full flex flex-col rounded-xl bg-[hsl(222_58%_8%/0.9)] border border-white/5 shadow-card",
                       denied && "ring-2 ring-red-500/60",
                     )}
                   >
-                    <header className="px-3 pt-3 pb-2 flex items-start justify-between gap-2">
+                    <header className="shrink-0 px-3 pt-3 pb-2 flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <h2 className="font-semibold">{STATUS_LABEL[status]}</h2>
                         <p className="text-xs text-white/55">{items.length} {STATUS_TH[status]}</p>
@@ -416,7 +397,7 @@ export default function ProjectBoard() {
                       </DropdownMenu>
                     </header>
 
-                    <div data-list-body className="flex-1 min-h-[4rem] overflow-y-auto scroll-thin px-2 pb-1 space-y-2">
+                    <div data-list-body className="flex-1 min-h-0 overflow-y-auto scroll-thin px-1.5 pb-1 space-y-2">
                       {denied && <p className="rounded-md bg-red-500/15 px-2 py-1.5 text-xs text-red-200">{denied}</p>}
                       {visible.length === 0 && !showPlaceholder && composer !== status && (
                         creatable ? (
@@ -429,7 +410,7 @@ export default function ProjectBoard() {
                             </Button>
                           </div>
                         ) : (
-                          <p className="py-6 text-center text-xs text-white/50">ลากการ์ดมาวางที่นี่</p>
+                          <p className="py-6 text-center text-xs text-white/50">ยังไม่มีการ์ด</p>
                         )
                       )}
                       {visible.map((task, i) => (
@@ -456,11 +437,13 @@ export default function ProjectBoard() {
                     </div>
 
                     {creatable && composer !== status && visible.length > 0 && (
-                      <button onClick={() => setComposer(status)} className="m-2 mt-1 flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-white/70 hover:bg-white/10 hover:text-white">
+                      <button onClick={() => setComposer(status)} className="shrink-0 m-2 mt-1 flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-white/75 hover:bg-white/10 hover:text-white">
                         <Plus className="h-4 w-4" /> เพิ่มการ์ด
                       </button>
                     )}
-                    {!creatable && <div className="h-2" />}
+                    {!creatable && (
+                      <p className="shrink-0 m-2 mt-1 px-2 py-2 text-xs text-white/40" title="การ์ดเข้าลิสต์นี้ได้โดยผ่าน Review">ลากการ์ดมาวางที่นี่</p>
+                    )}
                   </section>
                 );
               })}
@@ -469,7 +452,7 @@ export default function ProjectBoard() {
         )}
 
         {/* bottom dock */}
-        <nav className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 rounded-2xl border border-white/10 bg-[hsl(258_34%_8%/0.92)] backdrop-blur px-2 py-1.5 shadow-elevated max-w-[calc(100%-1rem)] overflow-x-auto" aria-label="มุมมองบอร์ด">
+        <nav className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 rounded-2xl border border-white/10 bg-[hsl(224_64%_6%/0.92)] backdrop-blur px-2 py-1.5 shadow-elevated max-w-[calc(100%-1rem)] overflow-x-auto" aria-label="มุมมองบอร์ด">
           <DockButton icon={History} label="กิจกรรมล่าสุด" onClick={() => setActivityOpen(true)} />
           <DockButton icon={GanttChart} label="ไทม์ไลน์" active={view === "timeline"} onClick={() => setParam("view", "timeline")} />
           <DockButton icon={KanbanSquare} label="บอร์ด" active={view === "board"} onClick={() => setParam("view", null)} />
@@ -601,7 +584,7 @@ function FilterPopover({ filters, setFilters, members, active }: { filters: Filt
     <Popover>
       <PopoverTrigger asChild>
         <button className={cn("h-9 inline-flex items-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition-colors", active ? "border-primary bg-primary/25" : "border-white/15 bg-white/5 hover:bg-white/10")}>
-          <Filter className="h-4 w-4" /> ฟิลเตอร์
+          <Filter className="h-4 w-4" /> <span className="hidden sm:inline">ฟิลเตอร์</span>
           {active > 0 && <span className="min-w-5 h-5 px-1 rounded-full bg-primary text-[11px] font-bold grid place-items-center">{active}</span>}
         </button>
       </PopoverTrigger>
@@ -673,7 +656,7 @@ function AutomationPopover({ isAdmin }: { isAdmin: boolean }) {
     <Popover>
       <PopoverTrigger asChild>
         <button className="h-9 inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 text-sm font-medium hover:bg-white/10">
-          <Zap className="h-4 w-4" /> อัตโนมัติ
+          <Zap className="h-4 w-4" /> <span className="hidden sm:inline">อัตโนมัติ</span>
         </button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 space-y-3 text-sm">

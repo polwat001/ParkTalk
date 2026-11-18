@@ -47,9 +47,9 @@ export default function MyTasks() {
 
   const grid = (items: Task[], claim = false) =>
     items.length === 0 ? null : (
-      <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
+      <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
         {items.map((t) => (
-          <TaskCard key={t.id} task={t} db={db} me={me} showProject canClaim={claim} onClaim={(id) => run(() => claimTask(id), `รับงาน ${id} แล้ว`)} onOpen={(id) => navigate(`/tasks/${id}`)} />
+          <TaskCard key={t.id} task={t} db={db} me={me} showProject spacious canClaim={claim} onClaim={(id) => run(() => claimTask(id), `รับงาน ${id} แล้ว`)} onOpen={(id) => navigate(`/tasks/${id}`)} />
         ))}
       </div>
     );
@@ -57,19 +57,20 @@ export default function MyTasks() {
   return (
     <AppLayout
       title="งานของฉัน"
+      contentClassName="max-w-[90rem] px-4 sm:px-6 lg:px-8 lg:py-8"
       subtitle="งานที่คุณเป็นผู้รับผิดชอบหรือผู้ร่วมงาน เรียงตามกำหนดส่ง"
       actions={
         <>
-          <div className="relative">
+          <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="ค้นหางาน..." className="pl-9 h-9 bg-card w-56" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="ค้นหางาน..." className="pl-9 bg-card" />
           </div>
-          <Button size="sm" onClick={() => setCreateOpen(true)}><Plus className="h-4 w-4" /> สร้าง Task</Button>
+          <Button onClick={() => setCreateOpen(true)}><Plus className="h-4 w-4" /> สร้าง Task</Button>
         </>
       }
     >
       <Tabs defaultValue="open">
-        <TabsList>
+        <TabsList className="h-auto max-w-full flex-wrap justify-start">
           <TabsTrigger value="open">กำลังดำเนินการ ({openCount})</TabsTrigger>
           <TabsTrigger value="claim"><Hand className="h-3.5 w-3.5 mr-1" />เปิดให้รับ ({claimable.length})</TabsTrigger>
           <TabsTrigger value="done">เสร็จแล้ว ({done.length})</TabsTrigger>

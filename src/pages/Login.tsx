@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { BellRing, CalendarDays, KanbanSquare, ShieldCheck } from "lucide-react";
-import { ParkTalkLogo } from "@/components/parktalk/ParkTalkLogo";
+import { WebparkLogo } from "@/components/parktalk/ParkTalkLogo";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,9 +39,10 @@ export default function Login() {
   return (
     <main className="min-h-screen grid lg:grid-cols-2 bg-background">
       <section className="relative hidden lg:flex bg-gradient-hero text-primary-foreground p-12 flex-col justify-between overflow-hidden">
-        <div className="absolute -bottom-20 -right-20 h-96 w-96 rounded-full bg-fuchsia-500/20 blur-3xl" />
-        <div className="relative flex items-center gap-3">
-          <ParkTalkLogo className="h-12 w-12 text-2xl rounded-xl" />
+        <div className="absolute -bottom-20 -right-20 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
+        <div className="relative flex items-center gap-4">
+          <WebparkLogo className="h-12" />
+          <span className="h-10 w-px bg-white/25" aria-hidden />
           <div>
             <h1 className="text-2xl font-bold tracking-tight">ParkTalk</h1>
             <p className="text-xs uppercase tracking-[0.25em] text-primary-foreground/70">Dev Team Workspace</p>
@@ -51,16 +52,16 @@ export default function Login() {
           <h2 className="text-5xl font-bold leading-tight">
             วางแผนงาน มอบหมายงาน
             <br />
-            <span className="text-secondary">ไม่มีงานไหนหลุดกำหนด.</span>
+            <span className="text-cyan-300">ไม่มีงานไหนหลุดกำหนด.</span>
           </h2>
           <p className="text-lg text-primary-foreground/80 max-w-md">
             ศูนย์กลางจัดการงานของทีม Development — กระดาน Kanban ปฏิทินกำหนดส่ง และแจ้งเตือนผ่านอีเมลบริษัท
           </p>
           <div className="flex flex-wrap gap-4 text-sm">
-            <span className="flex items-center gap-2"><KanbanSquare className="h-4 w-4 text-secondary" /> Kanban</span>
-            <span className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-secondary" /> Calendar</span>
-            <span className="flex items-center gap-2"><BellRing className="h-4 w-4 text-secondary" /> Deadline Alerts</span>
-            <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-secondary" /> Role & Permission</span>
+            <span className="flex items-center gap-2"><KanbanSquare className="h-4 w-4 text-cyan-300" /> Kanban</span>
+            <span className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-cyan-300" /> Calendar</span>
+            <span className="flex items-center gap-2"><BellRing className="h-4 w-4 text-cyan-300" /> Deadline Alerts</span>
+            <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-cyan-300" /> Role & Permission</span>
           </div>
         </div>
         <div className="relative text-xs text-primary-foreground/50">© {new Date().getFullYear()} {db.settings.companyName}</div>
@@ -69,7 +70,8 @@ export default function Login() {
       <section className="flex items-center justify-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-6">
           <div className="lg:hidden flex items-center gap-3">
-            <ParkTalkLogo className="h-10 w-10 text-xl" />
+            <WebparkLogo className="h-8" />
+            <span className="h-7 w-px bg-white/25" aria-hidden />
             <h1 className="text-xl font-bold">ParkTalk</h1>
           </div>
           <div>

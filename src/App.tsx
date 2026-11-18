@@ -13,6 +13,7 @@ import TaskDetail from "./pages/TaskDetail.tsx";
 import Workload from "./pages/Workload.tsx";
 import CalendarPage from "./pages/CalendarPage.tsx";
 import Notifications from "./pages/Notifications.tsx";
+import ProfileSettings from "./pages/ProfileSettings.tsx";
 import AdminUsers from "./pages/admin/AdminUsers.tsx";
 import AdminPermissions from "./pages/admin/AdminPermissions.tsx";
 import AdminSettings from "./pages/admin/AdminSettings.tsx";
@@ -60,6 +61,7 @@ const App = () => {
               <Route path="/team/workload" element={<Workload />} />
               <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/notifications" element={<Notifications />} />
+              <Route path="/profile" element={<ProfileSettings />} />
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/permissions" element={<AdminPermissions />} />
               <Route path="/admin/settings" element={<AdminSettings />} />

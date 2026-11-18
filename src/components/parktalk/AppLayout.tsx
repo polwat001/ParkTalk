@@ -11,6 +11,7 @@ import {
   Menu,
   Search,
   Settings,
+  UserRound,
   UsersRound,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -25,7 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { GlobalSearch } from "./GlobalSearch";
-import { ParkTalkLogo } from "./ParkTalkLogo";
+import { ParkTalkLogo, WebparkLogo } from "./ParkTalkLogo";
 import { UserAvatar } from "./UserAvatar";
 import { ROLE_LABEL } from "@/lib/parktalk/constants";
 import { can } from "@/lib/parktalk/permissions";
@@ -37,6 +38,7 @@ export interface AppLayoutProps {
   title: string;
   subtitle?: string;
   actions?: React.ReactNode;
+  contentClassName?: string;
   /** full-width content instead of the centred container */
   wide?: boolean;
   /** page draws its own header and fills the remaining height (board) */
@@ -50,7 +52,7 @@ const ADMIN_LINKS = [
   { to: "/admin/audit-logs", label: "ประวัติระบบ (Audit Log)" },
 ];
 
-export default function AppLayout({ children, title, subtitle, actions, wide, bare }: AppLayoutProps) {
+export default function AppLayout({ children, title, subtitle, actions, contentClassName, wide, bare }: AppLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const db = useDb();
@@ -117,14 +119,16 @@ export default function AppLayout({ children, title, subtitle, actions, wide, ba
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
-      <header className="shrink-0 z-30 h-14 border-b border-white/5 bg-[hsl(258_34%_8%)] text-white">
+      <header className="shrink-0 z-30 h-14 border-b border-white/5 bg-[hsl(224_64%_6%)] text-white">
         <div className="h-full px-3 sm:px-4 flex items-center gap-2 sm:gap-4">
           <Button variant="ghost" size="icon" className="lg:hidden text-white hover:bg-white/10" onClick={() => setMenuOpen(true)} aria-label="เมนู">
             <Menu className="h-5 w-5" />
           </Button>
           <button onClick={() => navigate("/projects")} className="flex items-center gap-2 shrink-0" aria-label="ParkTalk หน้าแรก">
-            <ParkTalkLogo />
-            <span className="text-lg font-bold tracking-tight hidden sm:inline">ParkTalk</span>
+            <ParkTalkLogo className="sm:hidden" />
+            <WebparkLogo className="hidden sm:block h-7" />
+            <span className="hidden sm:block h-6 w-px bg-white/20" aria-hidden />
+            <span className="text-base font-bold tracking-tight">ParkTalk</span>
           </button>
 
           <nav className="hidden lg:flex items-center gap-1 ml-2" aria-label="เมนูหลัก">
@@ -166,7 +170,7 @@ export default function AppLayout({ children, title, subtitle, actions, wide, ba
             <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/10" onClick={() => navigate("/notifications")} aria-label={`การแจ้งเตือน ${unread} รายการที่ยังไม่อ่าน`}>
               <Bell className="h-5 w-5" />
               {unread > 0 && (
-                <span className="absolute top-1.5 right-1.5 min-w-4 h-4 px-1 rounded-full bg-fuchsia-500 text-[10px] font-bold grid place-items-center">
+                <span className="absolute top-1.5 right-1.5 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-[10px] font-bold grid place-items-center">
                   {unread > 9 ? "9+" : unread}
                 </span>
               )}
@@ -184,6 +188,9 @@ export default function AppLayout({ children, title, subtitle, actions, wide, ba
                   <div className="text-xs text-muted-foreground">{ROLE_LABEL[user.role]} · {user.email}</div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => navigate("/profile")}>
+                  <UserRound className="h-4 w-4 mr-2" /> ตั้งค่าโปรไฟล์
+                </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => navigate("/notifications")}>การแจ้งเตือน</DropdownMenuItem>
                 <DropdownMenuItem onSelect={handleLogout} className="text-rose-300 focus:text-rose-200">
                   <LogOut className="h-4 w-4 mr-2" /> ออกจากระบบ
@@ -195,9 +202,9 @@ export default function AppLayout({ children, title, subtitle, actions, wide, ba
       </header>
 
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-        <SheetContent side="left" className="w-72 bg-[hsl(258_34%_8%)] text-white border-white/10">
+        <SheetContent side="left" className="w-72 bg-[hsl(224_64%_6%)] text-white border-white/10">
           <SheetHeader>
-            <SheetTitle className="flex items-center gap-2 text-white"><ParkTalkLogo /> ParkTalk</SheetTitle>
+            <SheetTitle className="flex items-center gap-2 text-white"><WebparkLogo className="h-7" /> <span className="text-base">ParkTalk</span></SheetTitle>
           </SheetHeader>
           <nav className="mt-6 space-y-1" aria-label="เมนูหลัก">
             {nav.map((item) => navLink(item, true))}
@@ -217,7 +224,7 @@ export default function AppLayout({ children, title, subtitle, actions, wide, ba
         <div className="flex-1 min-h-0 flex flex-col">{children}</div>
       ) : (
         <main className="flex-1 min-w-0 overflow-y-auto scroll-thin">
-          <div className={cn("py-6 space-y-5", wide ? "px-4 sm:px-6" : "container max-w-6xl")}>
+          <div className={cn("py-6 space-y-5", wide ? "px-4 sm:px-6" : "container max-w-6xl", contentClassName)}>
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div className="min-w-0">
                 <h1 className="text-2xl font-bold truncate">{title}</h1>

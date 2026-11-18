@@ -62,7 +62,7 @@ export function BoardTable({ tasks, db, me, onOpen, onMove }: Props) {
   );
 
   return (
-    <div className="rounded-xl border border-white/10 bg-[hsl(256_26%_10%/0.94)] shadow-card overflow-hidden">
+    <div className="rounded-xl border border-white/10 bg-[hsl(222_56%_9%/0.94)] shadow-card overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-white/10">
         <div>
           <h2 className="font-semibold">ตารางการ์ดงาน</h2>

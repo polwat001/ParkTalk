@@ -35,6 +35,7 @@ export interface User {
   password: string; // mock only — a real backend stores a hash
   role: Role;
   department: string;
+  avatarUrl?: string;
   active: boolean;
   createdAt: string;
 }

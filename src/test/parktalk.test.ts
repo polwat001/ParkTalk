@@ -3,6 +3,7 @@ import { can, moveDeniedReason, moveKind } from "@/lib/parktalk/permissions";
 import { createSeed, DEMO_PASSWORD } from "@/lib/parktalk/seed";
 import {
   assignTask,
+  changePassword,
   claimTask,
   createTask,
   getDb,
@@ -10,7 +11,9 @@ import {
   logout,
   moveTask,
   resetDemoData,
+  resetPassword,
   runDeadlineCheckOn,
+  updateProfile,
   updateUser,
 } from "@/lib/parktalk/store";
 
@@ -80,6 +83,23 @@ describe("store actions", () => {
   it("does not let users change their own role", () => {
     login("admin@parktalk.co", DEMO_PASSWORD);
     expect(() => updateUser("U1", { role: "developer" })).toThrow();
+  });
+
+  it("updates only the signed-in user's profile and requires their current password", () => {
+    expect(() => updateProfile("New name", "Design")).toThrow();
+    const user = login("dev1@parktalk.co", DEMO_PASSWORD);
+    expect(() => updateProfile("  ", "Design")).toThrow();
+    updateProfile(" New name ", " Design ");
+    expect(getDb().users.find((entry) => entry.id === user.id)).toMatchObject({
+      name: "New name", department: "Design", email: user.email, role: user.role,
+    });
+    expect(() => resetPassword(user.id, "new-password")).toThrow();
+    expect(() => changePassword("wrong-password", "new-password")).toThrow();
+    expect(() => changePassword(DEMO_PASSWORD, "short")).toThrow();
+    changePassword(DEMO_PASSWORD, "new-password");
+    logout();
+    expect(() => login(user.email, DEMO_PASSWORD)).toThrow();
+    expect(login(user.email, "new-password").name).toBe("New name");
   });
 
   it("review flow: submit, revision with reason, approve, close", () => {

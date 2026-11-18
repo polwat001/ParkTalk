@@ -36,7 +36,7 @@ import type {
   User,
 } from "./types";
 
-const DB_KEY = "parktalk_db_v2";
+const DB_KEY = "parktalk_db_v3";
 const SESSION_KEY = "parktalk_session";
 
 // ─── persistence ────────────────────────────────────────────────────────────
@@ -45,7 +45,7 @@ function load(): Database {
     const raw = localStorage.getItem(DB_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Database;
-      if (parsed.version === 2) return parsed;
+      if (parsed.version === 3) return parsed;
     }
   } catch {
     /* fall through to seed */
@@ -65,10 +65,11 @@ function readSession() {
   }
 }
 
-function save() {
+function save(data = db, requirePersistence = false) {
   try {
-    localStorage.setItem(DB_KEY, JSON.stringify(db));
+    localStorage.setItem(DB_KEY, JSON.stringify(data));
   } catch {
+    if (requirePersistence) throw new Error("บันทึกรูปโปรไฟล์ไม่ได้ กรุณาตรวจสอบพื้นที่จัดเก็บของเบราว์เซอร์");
     /* storage full or blocked — keep in memory */
   }
 }
@@ -96,11 +97,11 @@ if (typeof window !== "undefined") {
   });
 }
 
-function commit<T>(mutator: (d: Database) => T): T {
+function commit<T>(mutator: (d: Database) => T, requirePersistence = false): T {
   const next = structuredClone(db);
   const result = mutator(next);
+  save(next, requirePersistence);
   db = next;
-  save();
   emit();
   return result;
 }
@@ -778,6 +779,42 @@ export function createUser(input: UserInput) {
   });
 }
 
+export function updateProfile(name: string, department: string) {
+  commit((d) => {
+    const user = actor(d);
+    const trimmedName = name.trim();
+    const trimmedDepartment = department.trim();
+    if (!trimmedName) throw new Error("กรุณาระบุชื่อ");
+    if (user.name === trimmedName && user.department === trimmedDepartment) return;
+    user.name = trimmedName;
+    user.department = trimmedDepartment;
+    audit(d, user.id, "update", "user", user.id, "แก้ไขข้อมูลโปรไฟล์");
+  });
+}
+
+export function updateProfileAvatar(expectedUserId: string, avatarUrl: string | null) {
+  commit((d) => {
+    const user = actor(d);
+    if (user.id !== expectedUserId) throw new PermissionError("บัญชีเปลี่ยนระหว่างแก้ไขโปรไฟล์ กรุณาลองอีกครั้ง");
+    if (avatarUrl !== null && (avatarUrl.length > 200_000 || !/^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(avatarUrl))) {
+      throw new Error("รูปโปรไฟล์ไม่ถูกต้องหรือมีขนาดใหญ่เกินไป");
+    }
+    if (avatarUrl === null) delete user.avatarUrl;
+    else user.avatarUrl = avatarUrl;
+    audit(d, user.id, "update", "user", user.id, avatarUrl ? "เปลี่ยนรูปโปรไฟล์" : "ลบรูปโปรไฟล์");
+  }, true);
+}
+
+export function changePassword(currentPassword: string, newPassword: string) {
+  commit((d) => {
+    const user = actor(d);
+    if (user.password !== currentPassword) throw new Error("รหัสผ่านปัจจุบันไม่ถูกต้อง");
+    if (newPassword.length < 8) throw new Error("รหัสผ่านอย่างน้อย 8 ตัวอักษร");
+    user.password = newPassword;
+    audit(d, user.id, "change_password", "user", user.id, "เปลี่ยนรหัสผ่านของตนเอง");
+  });
+}
+
 export function updateUser(id: string, patch: Partial<Pick<User, "name" | "role" | "department">>) {
   commit((d) => {
     const user = actor(d);
@@ -805,7 +842,7 @@ export function setUserActive(id: string, active: boolean) {
 export function resetPassword(id: string, password: string) {
   commit((d) => {
     const user = actor(d);
-    if (id !== user.id) requirePerm(d, user, "manageUsers");
+    requirePerm(d, user, "manageUsers");
     if (password.length < 8) throw new Error("รหัสผ่านอย่างน้อย 8 ตัวอักษร");
     const target = d.users.find((u) => u.id === id);
     if (!target) throw new Error("ไม่พบผู้ใช้");
